@@ -1,11 +1,9 @@
 from flask import Flask, request, render_template
 import pandas as pd
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
+import re
 
 # Global variables (initialized outside of functions for simplicity)
 df = None
-tfidf = None
 
 # Function to read CSV file with different encodings
 def read_csv_with_encodings(file_path):
@@ -19,50 +17,50 @@ def read_csv_with_encodings(file_path):
 
 # Read dataset and preprocess
 def preprocess_data(file_path):
-    global df, tfidf
+    global df
     
     df = read_csv_with_encodings(file_path)
     df = df.dropna(subset=['Title', 'Subtitle', 'Duration', 'Level', 'Image', 'Url', 'avg rate'])
-
+    
     # Split the title based on the subtitle
     df['Title'] = df.apply(lambda row: row['Title'].split(row['Subtitle'])[0].strip(), axis=1)
-    df['avg rate']=df.apply(lambda row: row['avg rate'].replace("Rating: ", "").replace("out of ", "/ "), axis=1)
+    df['avg rate'] = df['avg rate'].apply(lambda x: x.replace("Rating: ", "").replace("out of ", "/"))
     df['combined_features'] = (df['Title'] + " " + df['Subtitle']).str.lower()
     df['Duration'] = df['Duration'].apply(lambda x: float(x.split()[0]))
-    tfidf = TfidfVectorizer(stop_words='english')
-    tfidf_matrix = tfidf.fit_transform(df['combined_features'])
 
-def get_recommendations(keywords, Duration, Level=None):
-    global df, tfidf
+def text_similarity(text1, text2):
+    # Simple function to calculate cosine similarity between two texts
+    text1 = re.sub(r'[^\w\s]', '', text1.lower())  # Remove punctuation and convert to lowercase
+    text2 = re.sub(r'[^\w\s]', '', text2.lower())  # Remove punctuation and convert to lowercase
     
-    keywords = [keyword.lower() for keyword in keywords]
-    filtered_df = df[df['combined_features'].str.contains('|'.join(keywords), case=False, na=False)]
-    filtered_df = filtered_df[filtered_df['Duration'] <= Duration]
+    words1 = set(text1.split())
+    words2 = set(text2.split())
+    
+    if len(words1) == 0 or len(words2) == 0:
+        return 0.0
+    
+    intersection = words1 & words2
+    similarity = len(intersection) / float(len(words1) + len(words2) - len(intersection))
+    
+    return similarity
 
-    # Perform avg rate replacements early in the process
-    filtered_df['new avg rate'] = filtered_df['avg rate'].replace("Rating: ", "").replace("out of ", "/")
+def get_recommendations(keywords, duration, level=None):
+    global df
     
-    if Level and Level != "All Levels":
-        filtered_df = filtered_df[(filtered_df['Level'].str.contains(Level, case=False, na=False)) |
-                                  (filtered_df['Level'].str.contains("All Levels", case=False, na=False))]
+    keywords = [keyword.strip().lower() for keyword in keywords]
+    recommendations = []
     
-    if filtered_df.empty:
-        print("Filtered DataFrame is empty after applying filters.")
-        return pd.DataFrame()  # Return an empty DataFrame if no matches found
+    for index, row in df.iterrows():
+        if all(keyword in row['combined_features'] for keyword in keywords) and row['Duration'] <= duration:
+            if level and level != "All Levels" and level.lower() not in row['Level'].lower():
+                continue
+            
+            recommendations.append(row)
     
-    filtered_tfidf_matrix = tfidf.transform(filtered_df['combined_features'])
-    filtered_cosine_sim = cosine_similarity(filtered_tfidf_matrix, filtered_tfidf_matrix)
-    
-    sim_scores = list(enumerate(filtered_cosine_sim.mean(axis=1)))
-    sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
-    
-    course_indices = [i[0] for i in sim_scores]
-
-    # Select only the necessary columns
-    recommendations = filtered_df.iloc[course_indices][['Title', 'Subtitle', 'Duration', 'Level', 'Image', 'Url', 'new avg rate']]
-
-    # Drop duplicates based on 'Title'
+    recommendations = pd.DataFrame(recommendations)
+    recommendations = recommendations[['Title', 'Subtitle', 'Duration', 'Level', 'Image', 'Url', 'avg rate']]
     recommendations = recommendations.drop_duplicates(subset=['Title'])
+    
     return recommendations
 
 # Flask application setup
@@ -75,11 +73,11 @@ def index():
 @app.route('/recommend', methods=['POST'])
 def recommend():
     keywords = request.form['keywords'].split(',')
-    Duration = float(request.form['Duration'])
-    Level = request.form['Level']
-    Level = Level if Level != "" else None
+    duration = float(request.form['Duration'])
+    level = request.form['Level']
+    level = level if level != "" else None
     
-    recommendations = get_recommendations(keywords, Duration, Level)
+    recommendations = get_recommendations(keywords, duration, level)
     
     if recommendations.empty:
         return render_template('no_match.html')  # Render no_match.html for no recommendations found

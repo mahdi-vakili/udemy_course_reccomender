@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recommendations</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            background: white;
+            padding: 2rem;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            text-align: center;
+            margin: 2rem auto;
+        }
+
+        .course-card {
+            display: flex;
+            align-items: center;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .course-image {
+            width: 340px;
+            height: 191px;
+            border-radius: 8px;
+            margin-right: 1rem;
+            object-fit: cover;
+        }
+
+        .course-details {
+            flex: 1;
+            text-align: left;
+        }
+
+        .course-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 0.5rem;
+            text-decoration: underline;
+        }
+
+        .course-subtitle {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+
+        .course-info {
+            font-size: 0.9rem;
+            color: #888;
+            margin-top: 0.75rem;
+        }
+
+        .course-rating {
+            font-size: 0.9rem;
+            color: #f39c12;
+            margin-top: 0.5rem;
+        }
+
+        .btn-primary {
+            margin-top: 20px;
+        }
+
+        .star-icon {
+            color: #f39c12;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Recommendations Generated</h1>
+        <p>{{ recommendations|length }} courses found</p>
+
+        {% if not recommendations %}
+        <div class="alert alert-warning" role="alert">
+            No recommendations found based on your criteria.
+        </div>
+        {% else %}
+            {% for recommendation in recommendations %}
+                <a href="{{ recommendation['Url'] }}" target="_blank" class="course-card">
+                    <img src="{{ recommendation['Image'] }}" alt="{{ recommendation['Title'] }}" class="course-image">
+                    <div class="course-details">
+                        <div class="course-title">{{ recommendation['Title'] }}</div>
+                        <div class="course-subtitle">{{ recommendation['Subtitle'] }}</div>
+                        <div class="course-info">
+                            <div class="course-rating">
+                                <span class="star-icon">★</span><strong> Rating: {{ recommendation['new avg rate'] }} </strong>
+                            </div>
+                            <strong>Duration:</strong> {{ recommendation['Duration'] }} hours<br>
+                            <strong>Level:</strong> {{ recommendation['Level'] }}
+                        </div>
+
+                    </div>
+                </a>
+            {% endfor %}
+        {% endif %}
+        
+        <a href="/" class="btn btn-primary">Go Back</a>
+    </div>
+</body>
+</html>

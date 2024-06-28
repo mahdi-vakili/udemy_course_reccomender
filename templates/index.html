@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Recommender</title>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f0f0f0; /* Light gray background */
+            color: #333; /* Dark gray text */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            max-width: 600px;
+            background: #ffffff; /* White container background */
+            padding: 2rem;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1); /* Lighter box shadow */
+            border-radius: 8px;
+        }
+        .form-group label {
+            font-weight: 600;
+            color: #555; /* Dark gray label text */
+        }
+        .form-control {
+            background: #f5f5f5; /* Light gray form background */
+            color: #333; /* Dark gray form text */
+            border: 1px solid #ccc; /* Light gray border */
+        }
+        .form-control:focus {
+            background: #e5e5e5; /* Lighter gray on focus */
+            color: #333; /* Dark gray on focus */
+            border: 1px solid #999; /* Darker gray border on focus */
+        }
+        .btn-primary {
+            background-color: #007bff; /* Bootstrap primary color */
+            border-color: #007bff; /* Bootstrap primary color */
+            color: #fff; /* White text */
+        }
+        .btn-primary:hover {
+            background-color: #0056b3; /* Darker blue on hover */
+            border-color: #0056b3; /* Darker blue border on hover */
+        }
+        h1 {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333; /* Dark gray heading text */
+        }
+        h6, h3 {
+            font-weight: normal;
+            color: #666; /* Medium gray text */
+        }
+        h6 {
+            font-size: 1rem;
+        }
+        h3 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #888; /* Dark gray heading text */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <h1 class="text-center mb-4">Udemy Course Recommender</h1>
+<p class="text-center mb-4">Find the perfect online course for you based on your preferences. Recommendations are based on the Udemy top 15000 courses dataset. <br><a href="https://www.kaggle.com/datasets/mahmoudahmed6/udemy-courses-top-15000-course-2023?select=data.csv" target="_blank">View dataset</a></p>
+
+        <form action="/recommend" method="post">
+            <div class="form-group">
+                <label for="keywords">Keywords (comma-separated):</label>
+                <input type="text" class="form-control" id="keywords" name="keywords" required>
+            </div>
+            <div class="form-group">
+                <label for="Duration">Maximum Duration (hours):</label>
+                <input type="number" step="0.5" min="0" class="form-control" id="Duration" name="Duration" required>
+            </div>
+            <div class="form-group">
+                <label for="Level">Course Level:</label>
+                <select class="form-control" id="Level" name="Level">
+                    <option value="">Any Level</option>
+                    <option value="Beginner">Beginner</option>
+                    <option value="Intermediate">Intermediate</option>
+                    <option value="Expert">Expert</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Get Recommendations</button>
+        </form>
+        <h3 class="text-center mt-4">Fundamentals of E-Learning Course Project</h3>
+        <h3 class="text-center mt-2">Mahdi Vakili</h3>
+    </div>
+</body>
+</html>
